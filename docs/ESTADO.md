@@ -1,26 +1,27 @@
 # Estado do Projeto — O Alquimista das Estações
 
 ## Objetivo atual
-Estruturar a base inicial do projeto 2D Top-Down (URP) na Unity, validar a conexão com o servidor MCP e estabelecer as diretrizes de arquitetura e fluxo de trabalho em `AGENTS.md`.
+Implementar o Movimento Top-Down 2D do Player e o sistema de Câmera suave (`CameraFollow`) na cena base da Ilha 1 (`Assets/Scenes/Ilha_01_Primavera.unity`).
 
 ## Feito
-- Conexão com o Unity Editor validada via MCP (`console.write` com `"MCP conectado"`).
-- Estrutura de pastas criada em `Assets/`:
-  - `Assets/Scripts`
-  - `Assets/Prefabs`
-  - `Assets/Sprites`
-  - `Assets/Audio`
-  - `Assets/Animations`
-  - `Assets/UI`
-- Criado `AGENTS.md` na raiz do projeto com as regras arquiteturais, de UI, MCP e fluxo Git.
-- Criado `docs/ESTADO.md` para acompanhamento contínuo entre sessões.
+- Conexão MCP validada, estrutura de pastas em `Assets/` criada e diretrizes definidas em `AGENTS.md`.
+- Criada e configurada a cena `Assets/Scenes/Ilha_01_Primavera.unity` (adicionada ao Build Settings):
+  - `ChaoIlha`: Sprite 2D quadrado (`Assets/Sprites/Square.png`), cor verde claro de primavera, escala `(20, 14, 1)` e `Sorting Order = -10`.
+  - `LimitesIlha`: Objeto pai vazio com 4 filhos (`Norte`, `Sul`, `Leste`, `Oeste`) equipados com `BoxCollider2D` alinhados às bordas do chão (`X: ±10`, `Y: ±7`).
+  - `Player`: Posicionado em `(0, 0, 0)` com Tag `Player`, `SpriteRenderer` (roxo/azul, `Sorting Order = 5`), `Rigidbody2D` (`Dynamic`, `Gravity Scale = 0`, `Freeze Rotation Z`, `Interpolate`), `BoxCollider2D` e `PlayerMovement`.
+- Criado o Prefab `Assets/Prefabs/Player.prefab` conectado à instância na cena.
+- Criado `Assets/Scripts/PlayerMovement.cs`:
+  - Leitura de WASD e Setas via `Keyboard.current` (New Input System), vetor normalizado, `_velocidade = 5f`, `linearVelocity` no `FixedUpdate`, espelhamento `flipX` e propriedade pública `UltimaDirecao`.
+- Criado `Assets/Scripts/CameraFollow.cs` e anexado à `Main Camera`:
+  - Fundo da câmera em azul água suave (mar), `_alvo` apontando para o `Player` (com fallback `FindAnyObjectByType<PlayerMovement>()`), `_suavizacao = 6f` e `Vector3.Lerp` no `LateUpdate` mantendo `Z = -10`.
+- Compilação e Console do Unity verificados via MCP (`0` erros, `0` warnings).
 
 ## Próximo passo
-- Definir e implementar a estrutura base da cena inicial (`SampleScene` ou cena principal), incluindo o jogador Top-Down com `Rigidbody2D`, `Collider2D` e movimentação via novo Input System, além dos Managers iniciais (`GameManager`).
+- Implementar os sistemas de estações/alquimia, itens coletáveis (`OnTriggerEnter2D`), Managers (`GameManager`) com padrão Singleton/Observer e HUD.
 
 ## Decisões tomadas
-- **Engine & Pipeline:** Unity 2D com Universal Render Pipeline (URP).
-- **Física & Controles:** Física 2D (`Rigidbody2D`, `Collider2D`, `OnTriggerEnter2D`) + novo Input System.
-- **Padrões de Código:** Scripts centralizados em `Assets/Scripts/` aplicando Singleton (Managers), Observer (eventos de HUD/coleta) e Prefabs.
-- **UI:** Padrão único para menus e HUD — Canvas com TextMeshPro (`Scale With Screen Size`, `1280x720`) ou UI Toolkit.
-- **Workflow Unity/Git:** Manipulação de cenas/prefabs exclusivamente via ferramentas MCP (com leitura prévia da cena), salvamento ao fim de cada tarefa e atualização de `docs/ESTADO.md` antes do commit (pedindo confirmação antes de `git push`).
+- **Engine & Pipeline:** Unity 6 (2D URP), usando `Rigidbody2D.linearVelocity` e `FindAnyObjectByType`.
+- **Física & Controles:** Física 2D (`Rigidbody2D` Dynamic sem gravidade + `BoxCollider2D`) e `UnityEngine.InputSystem` (`Keyboard.current`).
+- **Padrões de Código:** Scripts em `Assets/Scripts/` seguindo Singleton, Observer e Prefabs (`Assets/Prefabs/Player.prefab` reutilizável nas 5 ilhas).
+- **UI:** Padrão único em Canvas (`Scale With Screen Size`, `1280x720`, TextMeshPro) ou UI Toolkit.
+- **Workflow Unity/Git:** Edição de cenas/prefabs exclusivamente via MCP com leitura prévia do estado da cena e atualização de `docs/ESTADO.md` a cada entrega.
