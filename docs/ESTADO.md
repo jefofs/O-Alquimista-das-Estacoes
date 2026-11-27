@@ -1,26 +1,29 @@
 # Estado do Projeto — O Alquimista das Estações
 
 ## Objetivo atual
-Implementar o Sistema de Vida/Dano/Cura do Player (`PlayerVida`), combate contra o Inimigo Elemental 2D (`InimigoElemental`), `GameManager` com fluxo de Vitória/Derrota e painéis de UI na cena `Assets/Scenes/Ilha_01_Primavera.unity`.
+Implementar o fluxo completo de cenas (`Menu.unity` -> `Ilha_01_Primavera.unity` -> `VitoriaFinal.unity`), `MenuManager.cs`, `PainelPausa` (`ESC`) e prefabs reutilizáveis (`GameManager.prefab` e `Canvas_Gameplay.prefab`) para as 5 fases.
 
 ## Feito
-- **Movimento, Coleta, Mineração, Craft e Sprites da Equipe:** Loop completo da Ilha 1 com `PlayerMovement`, `CameraFollow`, `InventarioAlquimista`, `ArbustoFrutas`, `RecursoMineravel`, `BancadaCraft`, `Caldeirao`, `SpawnerIngredientes` e sprites definitivos (`869b225`) preservados.
-- **Vida, Dano e Cura do Player (`PlayerVida.cs` e `Player.prefab`):**
-  - `_vidaMaxima = 5`, `_tempoInvencivel = 1.0f`, piscar em vermelho durante invencibilidade, métodos `TomarDano` e `RecuperarVida` e eventos `OnVidaAlterada` e `OnPlayerMorreu`.
-  - Tecla `F` em `PlayerAcoes.cs` consome 1 `Fruta` para curar `+1 Vida` (com avisos na HUD se a vida estiver cheia ou sem frutas).
-- **Combate e Inimigo Elemental 2D (`InimigoElemental.cs` e `Inimigo_SlimeElemental.prefab`):**
-  - `PlayerAcoes.cs` expandido para atingir `InimigoElemental` com dano `1` (mãos) ou `2` (Picareta) e knockback direcional.
-  - `InimigoElemental.cs`: patrulha simples, perseguição via `Rigidbody2D.linearVelocity` dentro de `_raioDeteccao = 6f`, dano de contato com recarga (`1.2s`), flash de dano, knockback e drop ao morrer.
-  - 2 instâncias de `Inimigo_SlimeElemental.prefab` posicionadas próximas aos Veios de Cristal na Ilha 1.
-- **GameManager e Painéis de Vitória/Derrota (`GameManager.cs`, `HUDReceita.cs`):**
-  - Singleton `GameManager.Instance` inscrito em `Caldeirao.OnReceitaCompleta` e `PlayerVida.OnPlayerMorreu`, controlando `EstadoJogo`, `Time.timeScale` e métodos `ReiniciarFase`, `CarregarProximaFase` e `VoltarAoMenu`.
-  - `HUDReceita.cs` atualizado com `TextoVida` (`Vida: 5/5`), legenda com `F: Comer Fruta (+1 Vida)`, `PainelVitoria` (`"Ilha Purificada!"`) e `PainelDerrota` (`"Você foi derrotado!"`).
-- Compilação e Console do Unity verificados via MCP (`0` erros, `0` warnings).
+- **Base, Loop de Gameplay, Combate e Sprites da Equipe (`Ilha_01_Primavera.unity`):**
+  - `PlayerMovement`, `CameraFollow`, `InventarioAlquimista`, `PlayerAcoes` (`E`, `Espaço/Clique`, `F` para curar), `PlayerVida`, `ArbustoFrutas`, `RecursoMineravel`, `BancadaCraft`, `Caldeirao`, `SpawnerIngredientes`, `InimigoElemental` e sprites definitivos (`869b225`) preservados.
+- **Ilha 1 Preparada para Reutilização (`GameManager.cs`, `GameManager.prefab`, `Canvas_Gameplay.prefab`):**
+  - `EventSystem` com `InputSystemUIInputModule`.
+  - Botão `"Menu Principal"` adicionado ao `PainelVitoria` e ao `PainelDerrota` (`GameManager.VoltarAoMenu()`).
+  - Criado `PainelPausa` ativado pela tecla `ESC` durante `EstadoJogo.Jogando` (`Time.timeScale = 0f`) com botões `"Continuar"`, `"Reiniciar Fase"` e `"Menu Principal"`.
+  - `CarregarProximaFase()` carrega `_nomeProximaCena` (quando configurado) ou `"VitoriaFinal"` ao concluir a última fase.
+  - Salvos os Prefabs reutilizáveis `Assets/Prefabs/GameManager.prefab` e `Assets/Prefabs/Canvas_Gameplay.prefab`.
+- **Cena de Menu Inicial (`Assets/Scenes/Menu.unity` e `Assets/Scripts/MenuManager.cs`):**
+  - `MenuManager.cs` com `BtnStartGame()`, `BtnAbrirControles()`, `BtnFecharControles()`, `BtnVoltarMenu()` e `BtnQuit()`.
+  - `Canvas` (`1280x720`, `Scale With Screen Size`), fundo temático das 4 estações (`stretch`), título `"O Alquimista das Estações"`, subtítulo, botões `"Jogar"`, `"Como Jogar"` e `"Sair"` e `PainelControles` com instruções e botão `"Voltar"`.
+- **Cena de Vitória Final e Créditos (`Assets/Scenes/VitoriaFinal.unity`):**
+  - `Canvas` (`1280x720`) com título `"Todas as Estações Foram Restauradas!"`, mensagem de parabéns, painel editável de **Créditos da Equipe e Assets** e botões `"Jogar Novamente"` e `"Menu Principal"`.
+- **Build Profile (Scene List) e Validação:**
+  - Ordem configurada: `0: Assets/Scenes/Menu.unity`, `1: Assets/Scenes/Ilha_01_Primavera.unity`, `2: Assets/Scenes/VitoriaFinal.unity`.
+  - Console do Unity verificado via MCP (`0` erros, `0` warnings).
 
 ## Próximo passo
-- Criar as cenas das próximas ilhas/estações (Ilha 2 a 5), configurar `_nomeProximaCena` no `GameManager` e expandir receitas e mecânicas sazonais.
+- Criar as cenas das Ilhas 2 a 5 (`Verão`, `Outono`, `Inverno` e `Ilha Final`) reutilizando `Player.prefab`, `Caldeirao.prefab`, `GameManager.prefab` e `Canvas_Gameplay.prefab` e encadeando `_nomeProximaCena`.
 
 ## Decisões tomadas
-- **Engine & Pipeline:** Unity 6 (2D URP), Física 2D (`Rigidbody2D.linearVelocity`, `OverlapCircleAll`) e New Input System (`Keyboard.current`, `Mouse.current`).
-- **Padrões de Código:** Singleton (`GameManager`, `InventarioAlquimista`, `Caldeirao`, `PlayerVida`), Observer (`event Action`) e Prefabs em `Assets/Prefabs/`.
-- **Workflow Git/GitHub:** Desenvolvimento em branches (`feat/inimigo-vida-gamemanager`), nunca direto na `main`, com PR via `gh pr create`.
+- **UI & Consistência:** Uso padronizado de `Canvas` (`1280x720`, `Scale With Screen Size`) com `UnityEngine.UI.Text` (`LegacyRuntime.ttf`) e `InputSystemUIInputModule` em todas as cenas.
+- **Workflow Git/GitHub:** Desenvolvimento em branches por etapa (`feat/menus-fluxo-cenas`) com PR para `main`.
