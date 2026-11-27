@@ -16,9 +16,15 @@ Este arquivo define as regras arquiteturais e de fluxo de trabalho que qualquer 
 - **Uso Exclusivo do MCP para Cenas e Prefabs:** Qualquer alteração na cena ou em prefabs deve ser feita **apenas pelas ferramentas MCP do Unity** (`scene`, `gameobject`, `component`, `prefab`, etc.). **Nunca** edite arquivos `.unity` ou `.prefab` diretamente como texto/YAML.
 - **Sincronização com a Equipe:** Sempre leia o estado atual da cena via MCP **antes** de realizar qualquer alteração, pois a equipe também edita o projeto manualmente no Unity Editor.
 
-## 3. Fluxo de Trabalho de Sessão e Git
+## 3. Fluxo de Trabalho de Sessão, Git e GitHub
 - **Início de Sessão:** Sempre ler `docs/ESTADO.md` antes de iniciar qualquer tarefa para entender o contexto atual.
-- **Fim de Tarefa:** Ao concluir cada tarefa:
+- **Branches e Issues (Nunca na `main`):**
+  - **Nunca** desenvolva novas etapas diretamente na branch `main`.
+  - **Antes de iniciar qualquer tarefa:** verifique se a working tree está limpa (`git status`), sincronize a `main` (`git checkout main && git pull`) e crie uma branch específica para a etapa usando o padrão `feat/<nome-da-etapa>` (ou `fix/<nome>`, `art/<nome>`).
+  - Se existir uma Issue correspondente no GitHub (verificar via `gh issue list`), vincule a branch à issue com `gh issue develop <numero> --checkout`.
+  - **Durante a etapa:** trabalhe apenas nessa branch.
+- **Fim de Tarefa e Pull Request:** Ao concluir cada etapa:
   1. Salvar a cena ativa na Unity via MCP.
   2. Atualizar `docs/ESTADO.md` (mantendo-o enxuto, até 60 linhas).
-  3. Preparar o `git commit` com as alterações realizadas (**sempre perguntar ao usuário antes de executar `git push`**).
+  3. Fazer o `git commit` com mensagem descritiva.
+  4. **Sempre perguntar ao usuário** antes de rodar `git push -u origin <branch>` e abrir o Pull Request via `gh pr create --base main` (com título claro e resumo do que foi feito e testado).
