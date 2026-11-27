@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6663213134424909770}
   - component: {fileID: 5922896971435114514}
   - component: {fileID: 7860175153262172807}
+  - component: {fileID: 1736844136676578986}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -221,6 +222,20 @@ MonoBehaviour:
   _danoPicareta: 2
   _visualFerramenta: {fileID: 141740232018686566}
   _duracaoSwing: 0.15
+--- !u!114 &1736844136676578986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469633466245616084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf42d9fb5c804b94e827cd99c99b44ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVida
+  _vidaMaxima: 5
+  _tempoInvencivel: 1
 --- !u!1 &2056343698072186000
 GameObject:
   m_ObjectHideFlags: 0

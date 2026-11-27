@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class HUDReceita : MonoBehaviour
 {
     [Header("Painel Superior Esquerdo")]
+    [SerializeField] private Text _textoVida;
     [SerializeField] private Text _textoMochila;
     [SerializeField] private Text _textoFerramenta;
     [SerializeField] private Text _textoCaldeirao;
@@ -19,6 +20,7 @@ public class HUDReceita : MonoBehaviour
 
     private void OnEnable()
     {
+        PlayerVida.OnVidaAlterada += AoAlterarVida;
         InventarioAlquimista.OnInventarioAlterado += AtualizarHUD;
         InventarioAlquimista.OnFerramentaAlterada += AtualizarHUD;
         Caldeirao.OnReceitaAlterada += AtualizarHUD;
@@ -29,6 +31,7 @@ public class HUDReceita : MonoBehaviour
 
     private void OnDisable()
     {
+        PlayerVida.OnVidaAlterada -= AoAlterarVida;
         InventarioAlquimista.OnInventarioAlterado -= AtualizarHUD;
         InventarioAlquimista.OnFerramentaAlterada -= AtualizarHUD;
         Caldeirao.OnReceitaAlterada -= AtualizarHUD;
@@ -45,7 +48,7 @@ public class HUDReceita : MonoBehaviour
 
     private void Update()
     {
-        if (!string.IsNullOrEmpty(_avisoTemporarioAtual) && Time.time >= _tempoFimAviso)
+        if (!string.IsNullOrEmpty(_avisoTemporarioAtual) && Time.unscaledTime >= _tempoFimAviso)
         {
             _avisoTemporarioAtual = string.Empty;
             AtualizarTextoAvisoInferior();
@@ -54,9 +57,37 @@ public class HUDReceita : MonoBehaviour
 
     public void AtualizarHUD()
     {
+        if (PlayerVida.Instance != null)
+        {
+            AoAlterarVida(PlayerVida.Instance.VidaAtual, PlayerVida.Instance.VidaMaxima);
+        }
+        else if (_textoVida != null)
+        {
+            _textoVida.text = "Vida: 5/5";
+        }
+
         AtualizarTextoMochila();
         AtualizarTextoFerramenta();
         AtualizarTextoCaldeirao();
+    }
+
+    private void AoAlterarVida(int vidaAtual, int vidaMaxima)
+    {
+        if (_textoVida == null) return;
+
+        _textoVida.text = $"Vida: {vidaAtual}/{vidaMaxima}";
+        if (vidaAtual <= 1)
+        {
+            _textoVida.color = new Color(1f, 0.35f, 0.35f, 1f);
+        }
+        else if (vidaAtual <= 2)
+        {
+            _textoVida.color = new Color(1f, 0.72f, 0.25f, 1f);
+        }
+        else
+        {
+            _textoVida.color = new Color(0.45f, 1f, 0.55f, 1f);
+        }
     }
 
     private void AtualizarTextoMochila()
@@ -137,7 +168,7 @@ public class HUDReceita : MonoBehaviour
     private void ExibirAvisoTemporario(string mensagem)
     {
         _avisoTemporarioAtual = mensagem;
-        _tempoFimAviso = Time.time + _duracaoAviso;
+        _tempoFimAviso = Time.unscaledTime + _duracaoAviso;
         AtualizarTextoAvisoInferior();
     }
 

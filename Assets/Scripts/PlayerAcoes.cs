@@ -23,6 +23,7 @@ public class PlayerAcoes : MonoBehaviour
     [SerializeField] private float _duracaoSwing = 0.15f;
 
     private PlayerMovement _playerMovement;
+    private PlayerVida _playerVida;
     private SpriteRenderer _srFerramenta;
     private float _proximoAtaquePermitido;
     private bool _emSwing;
@@ -31,6 +32,7 @@ public class PlayerAcoes : MonoBehaviour
     private void Awake()
     {
         _playerMovement = GetComponent<PlayerMovement>();
+        _playerVida = GetComponent<PlayerVida>();
         if (_visualFerramenta == null)
         {
             Transform filho = transform.Find("VisualFerramenta");
@@ -59,16 +61,23 @@ public class PlayerAcoes : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale <= 0f) return;
+        if (_playerVida != null && _playerVida.EstaMorto) return;
+
         AtualizarPromptProximidade();
         AtualizarPosicaoFerramentaIdle();
 
         Keyboard teclado = Keyboard.current;
         Mouse mouse = Mouse.current;
 
-        bool pediuInteragir = teclado != null && teclado.eKey.wasPressedThisFrame;
-        if (pediuInteragir)
+        if (teclado != null && teclado.eKey.wasPressedThisFrame)
         {
             TentarInteragir();
+        }
+
+        if (teclado != null && teclado.fKey.wasPressedThisFrame)
+        {
+            TentarCurarComFruta();
         }
 
         bool pediuAtacar =
@@ -79,6 +88,29 @@ public class PlayerAcoes : MonoBehaviour
         {
             _proximoAtaquePermitido = Time.time + _cooldownAtaque;
             ExecutarAtaque();
+        }
+    }
+
+    private void TentarCurarComFruta()
+    {
+        if (_playerVida == null) _playerVida = GetComponent<PlayerVida>();
+        if (_playerVida == null || _playerVida.EstaMorto) return;
+
+        if (_playerVida.EstaVidaCheia)
+        {
+            RecursoMineravel.EmitirAviso("Sua vida já está cheia!");
+            return;
+        }
+
+        InventarioAlquimista inventario = InventarioAlquimista.Instance;
+        if (inventario != null && inventario.TentarConsumir(TipoIngrediente.Fruta, 1))
+        {
+            _playerVida.RecuperarVida(1);
+            RecursoMineravel.EmitirAviso("Você comeu 1 Fruta e recuperou +1 de Vida!");
+        }
+        else
+        {
+            RecursoMineravel.EmitirAviso("Sem Frutas na mochila para recuperar vida!");
         }
     }
 
@@ -144,6 +176,14 @@ public class PlayerAcoes : MonoBehaviour
             if (recurso != null)
             {
                 recurso.ReceberGolpe(dano, temPicareta);
+            }
+
+            InimigoElemental inimigo = atingidos[i].GetComponent<InimigoElemental>();
+            if (inimigo != null)
+            {
+                Vector2 dirEmpurrao = ((Vector2)inimigo.transform.position - (Vector2)transform.position);
+                if (dirEmpurrao.sqrMagnitude < 0.001f) dirEmpurrao = direcao;
+                inimigo.ReceberDano(dano, dirEmpurrao.normalized);
             }
         }
 
